@@ -285,26 +285,32 @@ export const getRetweetedPosts = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const retweetedPosts = await Post.find({ retweet: userId })
-      .populate({
-        path: "user",
-        select: "-password",
-      })
-      .populate({
-        path: "retweet",
-        populate: {
-          path: "user",
-          select: "-password",
-        },
-      })
-      .populate({
-        path: "comments.user",
-        select: "-password",
-      });
+    // Find all posts created by the logged-in user
+    const userPosts = await Post.find({ user: userId });
+
+    // Filter posts where retweet is not null
+    const retweetedPosts = userPosts.filter((post) => post.retweet !== null);
 
     if (retweetedPosts.length === 0) {
       return res.status(204).json({ message: "No retweeted posts found" });
     }
+
+    // Populate necessary fields
+    await Post.populate(retweetedPosts, {
+      path: "user",
+      select: "-password",
+    });
+    await Post.populate(retweetedPosts, {
+      path: "retweet",
+      populate: {
+        path: "user",
+        select: "-password",
+      },
+    });
+    await Post.populate(retweetedPosts, {
+      path: "comments.user",
+      select: "-password",
+    });
 
     res.status(200).json(retweetedPosts);
   } catch (error) {
