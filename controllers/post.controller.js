@@ -295,24 +295,28 @@ export const getRetweetedPosts = async (req, res) => {
       return res.status(204).json({ message: "No retweeted posts found" });
     }
 
-    // Populate necessary fields
-    await Post.populate(retweetedPosts, {
-      path: "user",
-      select: "-password",
-    });
-    await Post.populate(retweetedPosts, {
-      path: "retweet",
-      populate: {
+    // Get IDs of retweeted posts
+    const retweetedPostIds = retweetedPosts.map((post) => post._id);
+
+    // Populate necessary fields in one query
+    const populatedPosts = await Post.find({ _id: { $in: retweetedPostIds } })
+      .populate({
         path: "user",
         select: "-password",
-      },
-    });
-    await Post.populate(retweetedPosts, {
-      path: "comments.user",
-      select: "-password",
-    });
+      })
+      .populate({
+        path: "retweet",
+        populate: {
+          path: "user",
+          select: "-password",
+        },
+      })
+      .populate({
+        path: "comments.user",
+        select: "-password",
+      });
 
-    res.status(200).json(retweetedPosts);
+    res.status(200).json(populatedPosts);
   } catch (error) {
     console.log("Error in getRetweetedPosts controller: ", error);
     res.status(500).json({ error: "Internal server error" });
