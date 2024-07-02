@@ -170,6 +170,40 @@ export const saveUnsavePost = async (req, res) => {
   }
 };
 
+export const retweetPost = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { id: postId } = req.params;
+
+    const originalPost = await Post.findById(postId);
+
+    if (!originalPost) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    const newPost = new Post({
+      user: userId,
+      text: originalPost.text,
+      img: originalPost.img,
+      retweet: postId, // Reference to the original post
+    });
+
+    await newPost.save();
+
+    const notification = new Notification({
+      from: userId,
+      to: originalPost.user,
+      type: "retweet",
+    });
+    await notification.save();
+
+    res.status(201).json(newPost);
+  } catch (error) {
+    console.log("Error in retweetPost controller: ", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export const getAllPosts = async (req, res) => {
   try {
     const posts = await Post.find()
@@ -238,6 +272,38 @@ export const getSavedPosts = async (req, res) => {
     res.status(200).json(savedPosts);
   } catch (error) {
     console.log("Error in getSavedPosts controller: ", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const getRetweetedPosts = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const retweetedPosts = await Post.find({ retweet: userId })
+      .populate({
+        path: "user",
+        select: "-password",
+      })
+      .populate({
+        path: "retweet",
+        populate: {
+          path: "user",
+          select: "-password",
+        },
+      })
+      .populate({
+        path: "comments.user",
+        select: "-password",
+      });
+
+    if (!retweetedPosts.length) {
+      return res.status(404).json({ error: "No retweeted posts found" });
+    }
+
+    res.status(200).json(retweetedPosts);
+  } catch (error) {
+    console.log("Error in getRetweetedPosts controller: ", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };

@@ -38,6 +38,11 @@ const postSchema = new mongoose.Schema(
         },
       },
     ],
+    retweet: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Post",
+      default: null,
+    },
   },
   { timestamps: true }
 );

@@ -65,6 +65,9 @@ const userSchema = new mongoose.Schema(
         default: [],
       },
     ],
+    retweetedPosts: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Post", default: [] },
+    ],
   },
   { timestamps: true }
 );
