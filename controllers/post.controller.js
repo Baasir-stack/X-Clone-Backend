@@ -302,8 +302,8 @@ export const getRetweetedPosts = async (req, res) => {
         select: "-password",
       });
 
-    if (!retweetedPosts.length) {
-      return res.status(404).json({ error: "No retweeted posts found" });
+    if (retweetedPosts.length === 0) {
+      return res.status(204).json({ message: "No retweeted posts found" });
     }
 
     res.status(200).json(retweetedPosts);
