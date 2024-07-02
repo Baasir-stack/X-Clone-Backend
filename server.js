@@ -30,6 +30,7 @@ app.use(
     origin: [
       "https://x-clone-frontend-mu.vercel.app",
       "https://x-clone-frontend-mu.vercel.app/",
+      "http:localhost:3000",
     ],
 
     // Replace with your frontend URL
