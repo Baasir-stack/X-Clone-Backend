@@ -190,6 +190,11 @@ export const retweetPost = async (req, res) => {
 
     await newPost.save();
 
+    // Update the retweetedPosts array of the user
+    await User.findByIdAndUpdate(userId, {
+      $push: { retweetedPosts: newPost._id },
+    });
+
     const notification = new Notification({
       from: userId,
       to: originalPost.user,
