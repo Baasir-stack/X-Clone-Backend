@@ -27,7 +27,8 @@ const __dirname = path.resolve();
 // CORS configuration
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000", // Replace with your frontend URL
+    origin:
+      "https://x-clone-frontend-o23j.vercel.app" || "http://localhost:3000", // Replace with your frontend URL
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
   })
